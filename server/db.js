@@ -1,29 +1,16 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-
-const client = new MongoClient(process.env.MONGO_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
-let db;
+const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await client.connect();
-    db = client.db("digital_notebook"); // database name
-    await db.command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
-    console.error(err);
+    console.error(`Error: ${err.message}`);
     process.exit(1);
   }
 };
 
-const getDB = () => {
-  return db;
-};
-
-module.exports = { connectDB, getDB };
+module.exports = connectDB;

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { connectDB, getDB } = require('./db');
+const connectDB = require('./db');
 const cors = require('cors');
 const noteRoutes = require('./routes/noteRoutes');
 
@@ -16,10 +16,7 @@ const startServer = async () => {
     app.use(express.json());
 
     // Routes
-    app.use('/api/notes', (req, res, next) => {
-      req.db = getDB();
-      next();
-    }, noteRoutes);
+    app.use('/api', noteRoutes);
 
     app.get('/', (req, res) => {
       res.send('API is running...');

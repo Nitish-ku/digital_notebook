@@ -1,81 +1,121 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import MainContent from '../components/MainContent';
 import { Container, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
+import NotebookList from '../components/NotebookList';
+import ChapterList from '../components/ChapterList';
+import PageList from '../components/PageList';
+import MainContent from '../components/MainContent';
 
 const NotebookPage = () => {
-  const [notes, setNotes] = useState([]);
-  const [selectedNoteId, setSelectedNoteId] = useState(null);
+  const [notebooks, setNotebooks] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [pages, setPages] = useState([]);
+  const [selectedNotebookId, setSelectedNotebookId] = useState(null);
+  const [selectedChapterId, setSelectedChapterId] = useState(null);
+  const [selectedPageId, setSelectedPageId] = useState(null);
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const res = await axios.get('/api/notes');
-        if (Array.isArray(res.data)) { // Ensure data is an array
-          setNotes(res.data);
-          if (res.data.length > 0) {
-            setSelectedNoteId(res.data[0]._id);
-          }
-        } else {
-          console.error('API response is not an array:', res.data);
-          setNotes([]); // Reset notes to empty array if response is not valid
-        }
-      } catch (err) {
-        console.error('Error fetching notes:', err);
-        setNotes([]); // Reset notes to empty array on error
-      }
-    };
-    fetchNotes();
+    fetchNotebooks();
   }, []);
 
-  const selectedNote = Array.isArray(notes) ? notes.find(note => note._id === selectedNoteId) : undefined;
+  useEffect(() => {
+    if (selectedNotebookId) {
+      fetchChapters(selectedNotebookId);
+    }
+  }, [selectedNotebookId]);
 
-  const handleSelectNote = (id) => {
-    setSelectedNoteId(id);
+  useEffect(() => {
+    if (selectedChapterId) {
+      fetchPages(selectedChapterId);
+    }
+  }, [selectedChapterId]);
+
+  const fetchNotebooks = async () => {
+    try {
+      const res = await axios.get('/api/notebooks');
+      setNotebooks(res.data);
+      if (res.data.length > 0) {
+        setSelectedNotebookId(res.data[0]._id);
+      }
+    } catch (err) {
+      console.error('Error fetching notebooks:', err);
+    }
   };
 
-  const handleAddNote = async () => {
+  const fetchChapters = async (notebookId) => {
     try {
-      const res = await axios.post('/api/notes', { title: 'New Note', content: '<p>Start writing...</p>' });
-      setNotes([...notes, res.data]);
-      setSelectedNoteId(res.data._id);
+      const res = await axios.get(`/api/notebooks/${notebookId}/chapters`);
+      setChapters(res.data);
+      if (res.data.length > 0) {
+        setSelectedChapterId(res.data[0]._id);
+      }
     } catch (err) {
-      console.error('Error adding note:', err);
+      console.error('Error fetching chapters:', err);
+    }
+  };
+
+  const fetchPages = async (chapterId) => {
+    try {
+      const res = await axios.get(`/api/chapters/${chapterId}/pages`);
+      setPages(res.data);
+      if (res.data.length > 0) {
+        setSelectedPageId(res.data[0]._id);
+      }
+    } catch (err) {
+      console.error('Error fetching pages:', err);
+    }
+  };
+
+  const handleAddNotebook = async () => {
+    const name = prompt('Enter notebook name:');
+    if (name) {
+      try {
+        const res = await axios.post('/api/notebooks', { name });
+        setNotebooks([...notebooks, res.data]);
+        setSelectedNotebookId(res.data._id);
+      } catch (err) {
+        console.error('Error adding notebook:', err);
+      }
+    }
+  };
+
+  const handleAddChapter = async () => {
+    const name = prompt('Enter chapter name:');
+    if (name && selectedNotebookId) {
+      try {
+        const res = await axios.post(`/api/notebooks/${selectedNotebookId}/chapters`, { name });
+        setChapters([...chapters, res.data]);
+        setSelectedChapterId(res.data._id);
+      } catch (err) {
+        console.error('Error adding chapter:', err);
+      }
     }
   };
 
   const handleSaveNote = async (content) => {
-    if (selectedNote) {
+    if (selectedPageId) {
       try {
-        const res = await axios.put(`/api/notes/${selectedNote._id}`, { ...selectedNote, content });
-        setNotes(notes.map(note => (note._id === selectedNote._id ? res.data : note)));
+        await axios.put(`/api/pages/${selectedPageId}`, { content });
       } catch (err) {
         console.error('Error saving note:', err);
       }
     }
   };
 
-  const handleDeleteNote = async (id) => {
-    try {
-      await axios.delete(`/api/notes/${id}`);
-      setNotes(notes.filter(note => note._id !== id));
-      if (selectedNoteId === id) {
-        setSelectedNoteId(notes[0]?._id || null);
-      }
-    } catch (err) {
-      console.error('Error deleting note:', err);
-    }
-  };
+  const selectedPage = pages.find(page => page._id === selectedPageId);
 
   return (
     <Container fluid>
       <Row>
-        <Col xs={2} className="p-0">
-          <Sidebar notes={notes} onSelectNote={handleSelectNote} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} />
+        <Col md={2} className="p-0">
+          <NotebookList notebooks={notebooks} onSelectNotebook={setSelectedNotebookId} onAddNotebook={handleAddNotebook} />
         </Col>
-        <Col xs={10} className="p-0">
-          <MainContent noteContent={selectedNote ? selectedNote.content : ''} onSaveNote={handleSaveNote} />
+        <Col md={3} className="p-0">
+          <ChapterList chapters={chapters} onSelectChapter={setSelectedChapterId} onAddChapter={handleAddChapter} />
+          <PageList pages={pages} onSelectPage={setSelectedPageId} />
+        </Col>
+        <Col md={7} className="p-0">
+          <MainContent noteContent={selectedPage ? selectedPage.content : ''} onSaveNote={handleSaveNote} />
         </Col>
       </Row>
     </Container>

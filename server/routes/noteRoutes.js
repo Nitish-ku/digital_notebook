@@ -1,71 +1,104 @@
 const express = require('express');
 const router = express.Router();
-const { ObjectId } = require('mongodb');
+const Notebook = require('../models/Notebook');
+const Chapter = require('../models/Chapter');
+const Page = require('../models/Page');
 
-// Get all notes
-router.get('/', async (req, res) => {
+// --- Notebook Routes ---
+
+// Get all notebooks
+router.get('/notebooks', async (req, res) => {
   try {
-    const notes = await req.db.collection('notes').find().sort({ createdAt: -1 }).toArray();
-    res.json(notes);
+    const notebooks = await Notebook.find().populate('chapters');
+    res.json(notebooks);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Get a single note
-router.get('/:id', async (req, res) => {
+// Create a new notebook
+router.post('/notebooks', async (req, res) => {
+  const { name } = req.body;
+  const notebook = new Notebook({ name });
   try {
-    const note = await req.db.collection('notes').findOne({ _id: new ObjectId(req.params.id) });
-    if (!note) return res.status(404).json({ message: 'Note not found' });
-    res.json(note);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Create a new note
-router.post('/', async (req, res) => {
-  const { title, content } = req.body;
-  const newNote = {
-    title,
-    content,
-    createdAt: new Date(),
-  };
-  try {
-    const result = await req.db.collection('notes').insertOne(newNote);
-    res.status(201).json(result.ops[0]);
+    const newNotebook = await notebook.save();
+    res.status(201).json(newNotebook);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Update a note
-router.put('/:id', async (req, res) => {
-  const { title, content } = req.body;
-  const updatedFields = {};
-  if (title) updatedFields.title = title;
-  if (content) updatedFields.content = content;
+// --- Chapter Routes ---
 
+// Get all chapters for a notebook
+router.get('/notebooks/:notebookId/chapters', async (req, res) => {
   try {
-    const result = await req.db.collection('notes').updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: updatedFields }
-    );
-    if (result.matchedCount === 0) return res.status(404).json({ message: 'Note not found' });
-    res.json({ message: 'Note updated' });
+    const chapters = await Chapter.find({ notebook: req.params.notebookId }).populate('pages');
+    res.json(chapters);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Create a new chapter
+router.post('/notebooks/:notebookId/chapters', async (req, res) => {
+  const { name } = req.body;
+  const chapter = new Chapter({ name, notebook: req.params.notebookId });
+  try {
+    const newChapter = await chapter.save();
+    await Notebook.findByIdAndUpdate(req.params.notebookId, { $push: { chapters: newChapter._id } });
+    res.status(201).json(newChapter);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Delete a note
-router.delete('/:id', async (req, res) => {
+// --- Page Routes ---
+
+// Get all pages for a chapter
+router.get('/chapters/:chapterId/pages', async (req, res) => {
   try {
-    const result = await req.db.collection('notes').deleteOne({ _id: new ObjectId(req.params.id) });
-    if (result.deletedCount === 0) return res.status(404).json({ message: 'Note not found' });
-    res.json({ message: 'Note deleted' });
+    const pages = await Page.find({ chapter: req.params.chapterId });
+    res.json(pages);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Create a new page
+router.post('/chapters/:chapterId/pages', async (req, res) => {
+  const { title, content } = req.body;
+  const page = new Page({ title, content, chapter: req.params.chapterId });
+  try {
+    const newPage = await page.save();
+    await Chapter.findByIdAndUpdate(req.params.chapterId, { $push: { pages: newPage._id } });
+    res.status(201).json(newPage);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Get a single page
+router.get('/pages/:id', async (req, res) => {
+  try {
+    const page = await Page.findById(req.params.id);
+    if (!page) return res.status(404).json({ message: 'Page not found' });
+    res.json(page);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// Update a page
+router.put('/pages/:id', async (req, res) => {
+  const { title, content } = req.body;
+  try {
+    const updatedPage = await Page.findByIdAndUpdate(req.params.id, { title, content }, { new: true });
+    if (!updatedPage) return res.status(404).json({ message: 'Page not found' });
+    res.json(updatedPage);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 
