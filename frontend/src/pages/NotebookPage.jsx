@@ -20,12 +20,24 @@ const NotebookPage = () => {
   useEffect(() => {
     if (selectedNotebookId) {
       fetchChapters(selectedNotebookId);
+      setSelectedChapterId(null); // Reset chapter selection
+      setPages([]); // Clear pages
+      setSelectedPageId(null); // Reset page selection
+    } else {
+      setChapters([]);
+      setPages([]);
+      setSelectedChapterId(null);
+      setSelectedPageId(null);
     }
   }, [selectedNotebookId]);
 
   useEffect(() => {
     if (selectedChapterId) {
       fetchPages(selectedChapterId);
+      setSelectedPageId(null); // Reset page selection
+    } else {
+      setPages([]);
+      setSelectedPageId(null);
     }
   }, [selectedChapterId]);
 
@@ -34,9 +46,6 @@ const NotebookPage = () => {
       const res = await axios.get('/api/notebooks');
       if (Array.isArray(res.data)) {
         setNotebooks(res.data);
-        if (res.data.length > 0) {
-          setSelectedNotebookId(res.data[0]._id);
-        }
       } else {
         setNotebooks([]);
       }
@@ -49,24 +58,28 @@ const NotebookPage = () => {
   const fetchChapters = async (notebookId) => {
     try {
       const res = await axios.get(`/api/notebooks/${notebookId}/chapters`);
-      setChapters(res.data);
-      if (res.data.length > 0) {
-        setSelectedChapterId(res.data[0]._id);
+      if (Array.isArray(res.data)) {
+        setChapters(res.data);
+      } else {
+        setChapters([]);
       }
     } catch (err) {
       console.error('Error fetching chapters:', err);
+      setChapters([]);
     }
   };
 
   const fetchPages = async (chapterId) => {
     try {
       const res = await axios.get(`/api/chapters/${chapterId}/pages`);
-      setPages(res.data);
-      if (res.data.length > 0) {
-        setSelectedPageId(res.data[0]._id);
+      if (Array.isArray(res.data)) {
+        setPages(res.data);
+      } else {
+        setPages([]);
       }
     } catch (err) {
       console.error('Error fetching pages:', err);
+      setPages([]);
     }
   };
 
@@ -94,8 +107,7 @@ const NotebookPage = () => {
     }
   };
 
-  const handleAddPage = async () => {
-    const title = prompt('Enter page title:');
+  const handleAddPage = async (title) => {
     if (title && selectedChapterId) {
       try {
         const res = await axios.post(`/api/chapters/${selectedChapterId}/pages`, { title, content: '' });
@@ -118,6 +130,22 @@ const NotebookPage = () => {
   };
 
   const selectedPage = pages.find(page => page._id === selectedPageId);
+
+  let mainContentDisplay;
+  if (!selectedNotebookId) {
+    mainContentDisplay = <div className="text-center p-5 text-muted">Select a notebook to get started.</div>;
+  } else if (!selectedChapterId) {
+    mainContentDisplay = <div className="text-center p-5 text-muted">Select a chapter or add a new one.</div>;
+  } else if (!selectedPageId) {
+    mainContentDisplay = <div className="text-center p-5 text-muted">Select a page or add a new one.</div>;
+  } else {
+    mainContentDisplay = (
+      <MainContent 
+        noteContent={selectedPage ? selectedPage.content : ''} 
+        onSaveNote={handleSaveNote} 
+      />
+    );
+  }
 
   return (
     <div className="notebook-layout">
@@ -144,10 +172,7 @@ const NotebookPage = () => {
         />
       </div>
       <div className="main-content-column">
-        <MainContent 
-          noteContent={selectedPage ? selectedPage.content : ''} 
-          onSaveNote={handleSaveNote} 
-        />
+        {mainContentDisplay}
       </div>
     </div>
   );
