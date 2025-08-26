@@ -66,7 +66,9 @@ const MainContent = ({ noteContent, onSaveNote }) => {
           </div>
         </BubbleMenu>
       )}
-      <EditorContent editor={editor} />
+      <div className="editor-scroll-container">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };

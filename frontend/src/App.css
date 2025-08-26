@@ -102,6 +102,14 @@
   color: #333;
 }
 
+.editor-scroll-container {
+  height: calc(100vh - 150px); /* Adjust height as needed */
+  overflow-y: auto;
+  border: 1px solid #eee;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
 .saving-indicator {
   position: fixed;
   top: 20px;
@@ -111,6 +119,7 @@
   padding: 5px 10px;
   border-radius: 5px;
   font-size: 0.9rem;
+  z-index: 9999;
 }
 
 .list-group-item.active {
