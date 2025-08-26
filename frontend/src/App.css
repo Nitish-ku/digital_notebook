@@ -52,7 +52,92 @@
   color: #888;
 }
 
-/* TipTap Editor Styles */
+/* Existing styles... */
+
+.notebook-layout {
+  display: flex;
+  height: calc(100vh - 56px); /* Adjust 56px based on your navbar height */
+}
+
+.sidebar-column {
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid #dee2e6;
+}
+
+.notebook-column {
+  flex: 0 0 250px;
+}
+
+.chapter-column {
+  flex: 0 0 300px;
+}
+
+.main-content-column {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.tiptap-editor .ProseMirror {
+  min-height: 400px;
+  outline: none;
+}
+
+.tiptap-editor .ProseMirror h1, 
+.tiptap-editor .ProseMirror h2, 
+.tiptap-editor .ProseMirror h3 {
+  font-family: 'Georgia', serif; /* Or a similar serif font */
+}
+
+.tiptap-editor .ProseMirror p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.tiptap-editor .ProseMirror pre {
+  background: #f4f4f4;
+  border-radius: 5px;
+  padding: 1rem;
+  color: #333;
+}
+
+.saving-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.list-group-item.active {
+  background-color: #e9ecef; /* A light grey for active selection */
+  color: #212529; /* Dark text for contrast */
+  border-color: #dee2e6;
+}
+
+.btn-notebook {
+  background-color: #007bff; /* Blue */
+  border-color: #007bff;
+}
+
+.btn-chapter {
+  background-color: #28a745; /* Green */
+  border-color: #28a745;
+}
+
+.btn-page {
+  background-color: #6c757d; /* Grey */
+  border-color: #6c757d;
+}
+
+.add-item-form {
+  padding: 1rem;
+}
+
 .tiptap {
   border: 1px solid #ccc;
   min-height: 300px;

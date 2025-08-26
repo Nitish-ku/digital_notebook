@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import NotebookList from '../components/NotebookList';
 import ChapterList from '../components/ChapterList';
@@ -71,8 +70,7 @@ const NotebookPage = () => {
     }
   };
 
-  const handleAddNotebook = async () => {
-    const name = prompt('Enter notebook name:');
+  const handleAddNotebook = async (name) => {
     if (name) {
       try {
         const res = await axios.post('/api/notebooks', { name });
@@ -84,8 +82,7 @@ const NotebookPage = () => {
     }
   };
 
-  const handleAddChapter = async () => {
-    const name = prompt('Enter chapter name:');
+  const handleAddChapter = async (name) => {
     if (name && selectedNotebookId) {
       try {
         const res = await axios.post(`/api/notebooks/${selectedNotebookId}/chapters`, { name });
@@ -93,6 +90,19 @@ const NotebookPage = () => {
         setSelectedChapterId(res.data._id);
       } catch (err) {
         console.error('Error adding chapter:', err);
+      }
+    }
+  };
+
+  const handleAddPage = async () => {
+    const title = prompt('Enter page title:');
+    if (title && selectedChapterId) {
+      try {
+        const res = await axios.post(`/api/chapters/${selectedChapterId}/pages`, { title, content: '' });
+        setPages([...pages, res.data]);
+        setSelectedPageId(res.data._id);
+      } catch (err) {
+        console.error('Error adding page:', err);
       }
     }
   };
@@ -110,20 +120,36 @@ const NotebookPage = () => {
   const selectedPage = pages.find(page => page._id === selectedPageId);
 
   return (
-    <Container fluid>
-      <Row>
-        <Col md={2} className="p-0">
-          <NotebookList notebooks={notebooks} onSelectNotebook={setSelectedNotebookId} onAddNotebook={handleAddNotebook} />
-        </Col>
-        <Col md={3} className="p-0">
-          <ChapterList chapters={chapters} onSelectChapter={setSelectedChapterId} onAddChapter={handleAddChapter} />
-          <PageList pages={pages} onSelectPage={setSelectedPageId} />
-        </Col>
-        <Col md={7} className="p-0">
-          <MainContent noteContent={selectedPage ? selectedPage.content : ''} onSaveNote={handleSaveNote} />
-        </Col>
-      </Row>
-    </Container>
+    <div className="notebook-layout">
+      <div className="sidebar-column notebook-column">
+        <NotebookList 
+          notebooks={notebooks} 
+          selectedNotebookId={selectedNotebookId}
+          onSelectNotebook={setSelectedNotebookId} 
+          onAddNotebook={handleAddNotebook} 
+        />
+      </div>
+      <div className="sidebar-column chapter-column">
+        <ChapterList 
+          chapters={chapters} 
+          selectedChapterId={selectedChapterId}
+          onSelectChapter={setSelectedChapterId} 
+          onAddChapter={handleAddChapter} 
+        />
+        <PageList 
+          pages={pages} 
+          selectedPageId={selectedPageId}
+          onSelectPage={setSelectedPageId} 
+          onAddPage={handleAddPage} 
+        />
+      </div>
+      <div className="main-content-column">
+        <MainContent 
+          noteContent={selectedPage ? selectedPage.content : ''} 
+          onSaveNote={handleSaveNote} 
+        />
+      </div>
+    </div>
   );
 };
 

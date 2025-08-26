@@ -1,14 +1,31 @@
-import React, { useEffect } from 'react';
-import { useEditor, EditorContent, FloatingMenu } from '@tiptap/react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { FaBold, FaItalic, FaHeading, FaQuoteRight, FaCode } from 'react-icons/fa';
+import { FaBold, FaItalic, FaHeading } from 'react-icons/fa';
+import debounce from 'lodash.debounce';
 
 const MainContent = ({ noteContent, onSaveNote }) => {
+  const [status, setStatus] = useState('Saved');
+
+  const debouncedSave = useCallback(
+    debounce((content) => {
+      onSaveNote(content);
+      setStatus('Saved');
+    }, 2000), // 2-second debounce
+    [onSaveNote]
+  );
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
+        },
+        codeBlock: {
+          HTMLAttributes: {
+            class: 'language-javascript',
+            spellcheck: 'false',
+          },
         },
       }),
     ],
@@ -16,10 +33,12 @@ const MainContent = ({ noteContent, onSaveNote }) => {
     editorProps: {
       attributes: {
         class: 'prose prose-lg focus:outline-none',
+        spellcheck: 'false',
       },
     },
-    onBlur: ({ editor }) => {
-      onSaveNote(editor.getHTML());
+    onUpdate: ({ editor }) => {
+      setStatus('Saving...');
+      debouncedSave(editor.getHTML());
     },
   });
 
@@ -30,12 +49,13 @@ const MainContent = ({ noteContent, onSaveNote }) => {
   }, [noteContent, editor]);
 
   return (
-    <div className="main-content-editor container my-5">
+    <div className="tiptap-editor">
+      <div className="saving-indicator">{status}</div>
       {editor && (
-        <FloatingMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <div className="floating-menu bg-dark text-white p-2 rounded d-flex gap-2">
+        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+          <div className="bubble-menu bg-dark text-white p-2 rounded d-flex gap-2">
             <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}>
-              <FaHeading /> H1
+              <FaHeading />
             </button>
             <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'is-active' : ''}>
               <FaBold />
@@ -43,14 +63,8 @@ const MainContent = ({ noteContent, onSaveNote }) => {
             <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'is-active' : ''}>
               <FaItalic />
             </button>
-            <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive('blockquote') ? 'is-active' : ''}>
-              <FaQuoteRight />
-            </button>
-            <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive('codeBlock') ? 'is-active' : ''}>
-              <FaCode />
-            </button>
           </div>
-        </FloatingMenu>
+        </BubbleMenu>
       )}
       <EditorContent editor={editor} />
     </div>
