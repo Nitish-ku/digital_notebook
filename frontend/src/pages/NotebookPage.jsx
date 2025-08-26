@@ -33,12 +33,17 @@ const NotebookPage = () => {
   const fetchNotebooks = async () => {
     try {
       const res = await axios.get('/api/notebooks');
-      setNotebooks(res.data);
-      if (res.data.length > 0) {
-        setSelectedNotebookId(res.data[0]._id);
+      if (Array.isArray(res.data)) {
+        setNotebooks(res.data);
+        if (res.data.length > 0) {
+          setSelectedNotebookId(res.data[0]._id);
+        }
+      } else {
+        setNotebooks([]);
       }
     } catch (err) {
       console.error('Error fetching notebooks:', err);
+      setNotebooks([]);
     }
   };
 
