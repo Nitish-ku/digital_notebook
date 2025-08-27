@@ -1,6 +1,21 @@
-const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+require('dotenv').config();
+const { Clerk } = require('@clerk/clerk-sdk-node');
 
-// This middleware requires a signed-in user for the route to be accessible
-const protect = ClerkExpressRequireAuth();
+const clerk = Clerk({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
+
+const protect = async (req, res, next) => {
+  try {
+    await clerk.authenticateRequest(req);
+    if (req.auth.userId) {
+      next();
+    } else {
+      res.status(401).json({ message: 'Unauthorized' });
+    }
+  } catch (error) {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+};
 
 module.exports = { protect };
