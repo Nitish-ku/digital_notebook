@@ -1,15 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NotebookPage from './pages/NotebookPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 import Footer from './components/Footer';
-import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import Auth from './components/Auth';
 import './App.css';
-
-const PrivateRoute = ({ children }) => {
-  const { isSignedIn } = useAuth();
-  return isSignedIn ? children : <Navigate to="/sign-in" replace />;
-};
 
 function App() {
   return (
@@ -18,14 +16,21 @@ function App() {
         <div className="content-wrap">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/sign-in/*" element={<div className="clerk-centered-container"><SignIn routing="path" path="/sign-in" afterSignInUrl="/notebook" redirectUrl="/" /></div>} />
-            <Route path="/sign-up/*" element={<div className="clerk-centered-container"><SignUp routing="path" path="/sign-up" afterSignUpUrl="/notebook" redirectUrl="/" /></div>} />
-            <Route 
-              path="/notebook" 
+            <Route path="/sign-in/*" element={<SignInPage />} />
+            <Route path="/sign-up/*" element={<SignUpPage />} />
+            <Route
+              path="/notebook"
               element={
-                <PrivateRoute>
-                  <NotebookPage />
-                </PrivateRoute>
+                <>
+                  <SignedIn>
+                    <Auth>
+                      <NotebookPage />
+                    </Auth>
+                  </SignedIn>
+                  <SignedOut>
+                    <Navigate to="/sign-in" replace />
+                  </SignedOut>
+                </>
               }
             />
           </Routes>
