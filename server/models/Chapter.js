@@ -15,6 +15,10 @@ const chapterSchema = new mongoose.Schema({
     ref: 'Notebook',
     required: true,
   },
+  user: {
+    type: String,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

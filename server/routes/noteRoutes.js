@@ -10,9 +10,10 @@ const { protect } = require('../middleware/authMiddleware');
 // Get all notebooks for the authenticated user
 router.get('/notebooks', protect, async (req, res) => {
   try {
-    const notebooks = await Notebook.find({ user: req.auth.userId }).populate('chapters');
+    const notebooks = await Notebook.find({ user: req.auth.userId });
     res.json(notebooks);
   } catch (err) {
+    console.error('Error fetching notebooks:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -25,6 +26,7 @@ router.post('/notebooks', protect, async (req, res) => {
     const newNotebook = await notebook.save();
     res.status(201).json(newNotebook);
   } catch (err) {
+    console.error('Error creating notebook:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
@@ -37,6 +39,7 @@ router.get('/notebooks/:notebookId/chapters', protect, async (req, res) => {
     const chapters = await Chapter.find({ notebook: req.params.notebookId, user: req.auth.userId }).populate('pages');
     res.json(chapters);
   } catch (err) {
+    console.error('Error fetching chapters:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -50,6 +53,7 @@ router.post('/notebooks/:notebookId/chapters', protect, async (req, res) => {
     await Notebook.findByIdAndUpdate(req.params.notebookId, { $push: { chapters: newChapter._id } });
     res.status(201).json(newChapter);
   } catch (err) {
+    console.error('Error creating chapter:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
@@ -62,6 +66,7 @@ router.get('/chapters/:chapterId/pages', protect, async (req, res) => {
     const pages = await Page.find({ chapter: req.params.chapterId, user: req.auth.userId });
     res.json(pages);
   } catch (err) {
+    console.error('Error fetching pages:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -75,6 +80,7 @@ router.post('/chapters/:chapterId/pages', protect, async (req, res) => {
     await Chapter.findByIdAndUpdate(req.params.chapterId, { $push: { pages: newPage._id } });
     res.status(201).json(newPage);
   } catch (err) {
+    console.error('Error creating page:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
@@ -86,6 +92,7 @@ router.get('/pages/:id', protect, async (req, res) => {
     if (!page) return res.status(404).json({ message: 'Page not found' });
     res.json(page);
   } catch (err) {
+    console.error('Error fetching page:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -102,6 +109,7 @@ router.put('/pages/:id', protect, async (req, res) => {
     if (!updatedPage) return res.status(404).json({ message: 'Page not found or not authorized' });
     res.json(updatedPage);
   } catch (err) {
+    console.error('Error updating page:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
@@ -113,6 +121,7 @@ router.delete('/pages/:id', protect, async (req, res) => {
     if (result.deletedCount === 0) return res.status(404).json({ message: 'Page not found or not authorized' });
     res.json({ message: 'Page deleted' });
   } catch (err) {
+    console.error('Error deleting page:', err.message);
     res.status(500).json({ message: err.message });
   }
 });

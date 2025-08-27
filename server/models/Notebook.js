@@ -7,8 +7,7 @@ const notebookSchema = new mongoose.Schema({
     trim: true,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // We'll create a dummy User model for Mongoose to reference
+    type: String,
     required: true,
   },
   chapters: [{
