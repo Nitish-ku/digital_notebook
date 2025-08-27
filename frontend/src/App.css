@@ -52,7 +52,13 @@
   color: #888;
 }
 
-/* Existing styles... */
+.clerk-centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 56px); /* Adjust for navbar height */
+}
+
 
 .notebook-layout {
   display: flex;
