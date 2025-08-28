@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+const API = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL,
+});
+
 export const setupAxiosInterceptors = (getToken) => {
-  axios.interceptors.request.use(async (config) => {
+  API.interceptors.request.use(async (config) => {
     // Get the Clerk token
     const token = await getToken();
 
@@ -13,3 +17,5 @@ export const setupAxiosInterceptors = (getToken) => {
     return config;
   });
 };
+
+export default API;
