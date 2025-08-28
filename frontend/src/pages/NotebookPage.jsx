@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API from '../utils/axiosConfig';
+import axios from 'axios';
 import NotebookList from '../components/NotebookList';
 import ChapterList from '../components/ChapterList';
 import PageList from '../components/PageList';
@@ -43,7 +43,7 @@ const NotebookPage = () => {
 
   const fetchNotebooks = async () => {
     try {
-      const res = await API.get('/api/notebooks');
+      const res = await axios.get('/api/notebooks');
       if (Array.isArray(res.data)) {
         setNotebooks(res.data);
       } else {
@@ -57,7 +57,7 @@ const NotebookPage = () => {
 
   const fetchChapters = async (notebookId) => {
     try {
-      const res = await API.get(`/api/notebooks/${notebookId}/chapters`);
+      const res = await axios.get(`/api/notebooks/${notebookId}/chapters`);
       if (Array.isArray(res.data)) {
         setChapters(res.data);
       } else {
@@ -71,7 +71,7 @@ const NotebookPage = () => {
 
   const fetchPages = async (chapterId) => {
     try {
-      const res = await API.get(`/api/chapters/${chapterId}/pages`);
+      const res = await axios.get(`/api/chapters/${chapterId}/pages`);
       if (Array.isArray(res.data)) {
         setPages(res.data);
       } else {
@@ -86,7 +86,7 @@ const NotebookPage = () => {
   const handleAddNotebook = async (name) => {
     if (name) {
       try {
-        const res = await API.post('/api/notebooks', { name });
+        const res = await axios.post('/api/notebooks', { name });
         setNotebooks([...notebooks, res.data]);
         setSelectedNotebookId(res.data._id);
       } catch (err) {
@@ -98,7 +98,7 @@ const NotebookPage = () => {
   const handleAddChapter = async (name) => {
     if (name && selectedNotebookId) {
       try {
-        const res = await API.post(`/api/notebooks/${selectedNotebookId}/chapters`, { name });
+        const res = await axios.post(`/api/notebooks/${selectedNotebookId}/chapters`, { name });
         setChapters([...chapters, res.data]);
         setSelectedChapterId(res.data._id);
       } catch (err) {
@@ -110,7 +110,7 @@ const NotebookPage = () => {
   const handleAddPage = async (title) => {
     if (title && selectedChapterId) {
       try {
-        const res = await API.post(`/api/chapters/${selectedChapterId}/pages`, { title, content: '' });
+        const res = await axios.post(`/api/chapters/${selectedChapterId}/pages`, { title, content: '' });
         setPages([...pages, res.data]);
         setSelectedPageId(res.data._id);
       } catch (err) {
@@ -122,7 +122,7 @@ const NotebookPage = () => {
   const handleSaveNote = async (content) => {
     if (selectedPageId) {
       try {
-        await API.put(`/api/pages/${selectedPageId}`, { content });
+        await axios.put(`/api/pages/${selectedPageId}`, { content });
       } catch (err) {
         console.error('Error saving note:', err);
       }
