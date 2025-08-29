@@ -4,11 +4,10 @@ Digital Notebook is a personal application designed for organizing thoughts, not
 
 ## Live Demo
 
-[Link to your live application](https://digital-notebook-59e2.onrender.com)
+[Link to my live application](https://digital-notebook-59e2.onrender.com)
 
 ## Screenshots
 
-_(Add screenshots of your application here)_
 ![alt text](image.png)
 
 ## Features
