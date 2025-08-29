@@ -280,7 +280,7 @@
 @media (max-width: 595px) {
   .saving-indicator {
     top: auto;
-    bottom: 20px;
+    bottom: 60px; /* Increased bottom margin */
     right: 20px;
   }
 }
