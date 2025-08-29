@@ -277,5 +277,13 @@
   }
 }
 
+@media (max-width: 595px) {
+  .saving-indicator {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
 
 
