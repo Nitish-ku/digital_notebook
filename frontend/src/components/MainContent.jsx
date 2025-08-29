@@ -50,7 +50,6 @@ const MainContent = ({ noteContent, onSaveNote }) => {
 
   return (
     <div className="tiptap-editor">
-      <div className="saving-indicator">{status}</div>
       {editor && (
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
           <div className="bubble-menu bg-dark text-white p-2 rounded d-flex gap-2">
@@ -63,6 +62,7 @@ const MainContent = ({ noteContent, onSaveNote }) => {
             <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'is-active' : ''}>
               <FaItalic />
             </button>
+            <div className="saving-indicator-bubble">{status}</div>
           </div>
         </BubbleMenu>
       )}

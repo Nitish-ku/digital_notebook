@@ -116,17 +116,7 @@
   margin-top: 1rem;
 }
 
-.saving-indicator {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #333;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  z-index: 9999;
-}
+
 
 .list-group-item.active {
   background-color: #e9ecef; /* A light grey for active selection */
@@ -232,6 +222,16 @@
   background-color: yellow;
 }
 
+.saving-indicator-bubble {
+  color: #fff;
+  background-color: #333;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  margin-left: 10px;
+  align-self: center;
+}
+
 @media (max-width: 768px) {
   .notebook-layout {
     flex-direction: column;
@@ -277,13 +277,7 @@
   }
 }
 
-@media (max-width: 595px) {
-  .saving-indicator {
-    top: auto;
-    bottom: 60px; /* Increased bottom margin */
-    right: 20px;
-  }
-}
+
 
 
 
